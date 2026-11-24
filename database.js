@@ -68,3 +68,11 @@ async function initializeDatabase() {
     console.log('Database tables initialized');
   } catch (err) { console.error('Init DB error:', err); }
 }
+// Создаем админа, если его нет
+const adminExists = await dbGet(`SELECT * FROM users WHERE role = 'admin'`);
+if (!adminExists) {
+    const bcrypt = await import('bcrypt');
+    const hash = await bcrypt.default.hash('admin123', 10);
+    await dbRun(`INSERT INTO users (id, username, email, password_hash, full_name, role, is_verified) VALUES ('admin-id-123', 'admin', 'poltavtzevs@yandex.ru', ?, 'Сергей', 'admin', 1)`, [hash]);
+    console.log('Админ создан: poltavtzevs@yandex.ru / admin123');
+}
