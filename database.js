@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { config } from './config.js';
+import bcrypt from 'bcrypt'; // Добавили импорт bcrypt
 
 const db = new sqlite3.Database(config.database.path, (err) => {
   if (err) console.error('DB connection error:', err);
@@ -21,7 +22,6 @@ export const dbAll = (sql, params = []) => new Promise((res, rej) => {
 
 async function initializeDatabase() {
   try {
-    // Добавлены поля verification_code и is_verified
     await dbRun(`CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY, username TEXT UNIQUE NOT NULL, email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL, full_name TEXT, phone TEXT, role TEXT DEFAULT 'client',
@@ -57,6 +57,7 @@ async function initializeDatabase() {
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
+    // Создаем тестовые услуги
     const count = await dbGet(`SELECT COUNT(*) as count FROM services`);
     if (count.count === 0) {
       await dbRun(`INSERT INTO services (id, name, price, unit) VALUES ('srv_house', 'Строительство дома', 35000, 'м²')`);
@@ -65,14 +66,16 @@ async function initializeDatabase() {
       await dbRun(`INSERT INTO services (id, name, price, unit) VALUES ('srv_callback', 'Обратный звонок', 0, 'шт')`);
       console.log('Services seeded');
     }
+
+    // АВТО-СОЗДАНИЕ АДМИНА
+    const adminExists = await dbGet(`SELECT * FROM users WHERE role = 'admin'`);
+    if (!adminExists) {
+      const hash = await bcrypt.hash('admin123', 10);
+      await dbRun(`INSERT INTO users (id, username, email, password_hash, full_name, role, is_verified) 
+                   VALUES ('admin-id-123', 'admin', 'poltavtzevs@yandex.ru', ?, 'Сергей Полтавцев', 'admin', 1)`, [hash]);
+      console.log('Админ создан: poltavtzevs@yandex.ru / admin123');
+    }
+
     console.log('Database tables initialized');
   } catch (err) { console.error('Init DB error:', err); }
-}
-// Создаем админа, если его нет
-const adminExists = await dbGet(`SELECT * FROM users WHERE role = 'admin'`);
-if (!adminExists) {
-    const bcrypt = await import('bcrypt');
-    const hash = await bcrypt.default.hash('admin123', 10);
-    await dbRun(`INSERT INTO users (id, username, email, password_hash, full_name, role, is_verified) VALUES ('admin-id-123', 'admin', 'poltavtzevs@yandex.ru', ?, 'Сергей', 'admin', 1)`, [hash]);
-    console.log('Админ создан: poltavtzevs@yandex.ru / admin123');
 }
