@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автономные системы - Строительная компания</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Шапка -->
+    <header class="header sticky-top ">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="#hero">
+                    <i class="bi bi-building text-orange fs-1 me-2"></i>
+                    <div>
+                        <div class="fw-bold fs-5">Автономные системы</div>
+                        <small class="text-muted">Строительная компания</small>
+                    </div>
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto me-4">
+                        <li class="nav-item"><a class="nav-link" href="#about">О нас</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#services">Услуги</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#catalog">Каталог</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#orders">Отзывы</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#contacts">Контакты</a></li>  
+                    </ul>
+                    
+                    <div class="d-flex gap-2">
+                        <div id="userInfo" class="d-none align-items-center me-2">
+                            <span class="badge bg-orange me-2" id="userName"></span>
+                            <a href="/admin.html" id="adminPanelBtn" class="btn btn-sm btn-dark me-2 d-none">Админ-панель</a>
+                            <button class="btn btn-sm btn-outline-primary me-2" id="cabinetBtn" data-bs-toggle="modal" data-bs-target="#cabinetModal">Личный кабинет</button>
+                            <button class="btn btn-sm btn-outline-danger" id="logoutBtn">Выйти</button>
+                        </div>
+                        <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#loginModal" id="showLoginBtn">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Вход
+                        </button>
+                        <button type="button" class="btn btn-outline-orange" data-bs-toggle="modal" data-bs-target="#registerModal" id="showRegisterBtn">
+                            <i class="bi bi-person-plus me-1"></i>Регистрация
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Модальные окна (все наверху) -->
+   <div class="modal fade" id="registerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Регистрация</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="registerMessage" class="alert d-none" role="alert"></div>
+                
+                <!-- ШАГ 1: Ввод данных -->
+                <div id="registerStep1">
+                    <form id="registerForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Имя *</label>
+                                <input type="text" class="form-control" id="firstName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Фамилия *</label>
+                                <input type="text" class="form-control" id="lastName" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="registerEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Телефон</label>
+                            <input type="tel" class="form-control" id="registerPhone">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Пароль *</label>
+                            <input type="password" class="form-control" id="registerPassword" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Подтвердите пароль *</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">Я соглашаюсь с условиями</label>
+                        </div>
+                        <button type="submit" class="btn btn-orange w-100 mb-3">Зарегистрироваться</button>
+                    </form>
+                    <div class="text-center">
+                        <small>Уже есть аккаунт? <a href="#" class="text-orange" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-dismiss="modal">Войти</a></small>
+                    </div>
+                </div>
+
+                <!-- ШАГ 2: Ввод кода (изначально скрыт) -->
+                <div id="registerStep2" class="d-none text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-envelope-check text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h5 class="mb-3">Проверьте почту</h5>
+                    <p class="text-muted mb-4">Мы отправили 6-значный код на <br><strong id="sentToEmail"></strong></p>
+                    
+                    <div class="mb-4">
+                        <input type="text" class="form-control form-control-lg text-center fw-bold" 
+                               id="verificationCode" placeholder="000000" maxlength="6" 
+                               style="letter-spacing: 10px; font-size: 24px;">
+                    </div>
+                    
+                    <button type="button" class="btn btn-orange w-100 mb-3" id="verifyBtn">Подтвердить код</button>
+                    <button type="button" class="btn btn-link text-muted w-100" id="backToStep1">Изменить данные</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-box-arrow-in-right me-2"></i>Вход в систему</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="loginMessage" class="alert d-none" role="alert"></div>
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-orange w-100">Войти</button>
+                    </form>
+                    <div class="text-center mt-3">
+                        <small>Нет аккаунта? <a href="#" class="text-orange" data-bs-toggle="modal" data-bs-target="#registerModal" data-bs-dismiss="modal">Зарегистрироваться</a></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cabinetModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Мои заказы</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cabinetOrdersList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+        <div id="successToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage">Уведомление...</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Герой секция -->
+    <section id="hero" class="hero-section position-relative">
+        <div class="hero-overlay"></div>
+        <img src="trybi.jpg" alt="Строительство" class="hero-image" onerror="this.style.display='none'">
+        <div class="container position-relative h-100">
+            <div class="row h-100 align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-3 fw-bold text-white mb-4">Профессиональное строительство и ремонт</h1>
+                    <p class="lead text-white mb-4">Более 15 лет на рынке. Гарантия качества. Работаем под ключ.</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="#forma" class="btn btn-orange btn-lg">Заказать услугу</a>
+                        <a href="#about" class="btn btn-outline-light btn-lg">Узнать больше</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Преимущества -->
+        <!-- Преимущества (Bento Style) -->
+       <section id="about" class="py-5 bg-light">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="section-title mb-3">Наши преимущества</h2>
+                <p class="lead text-muted">Почему более 500 клиентов выбрали нашу компанию</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 hover-lift">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-box mb-3 mx-auto"><i class="bi bi-shield-check"></i></div>
+                            <h5 class="card-title">Гарантия качества</h5>
+                            <p class="card-text text-muted">Предоставляем гарантию на все виды работ до 5 лет</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 hover-lift">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-box mb-3 mx-auto"><i class="bi bi-clock-history"></i></div>
+                            <h5 class="card-title">Соблюдение сроков</h5>
+                            <p class="card-text text-muted">Выполняем работы точно в срок согласно договору</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 hover-lift">
+                        <div class="card-body text-center p-4">
+                            <div class="icon-box mb-3 mx-auto"><i class="bi bi-people"></i></div>
+                            <h5 class="card-title">Опытная команда</h5>
+                            <p class="card-text text-muted">Наши специалисты имеют опыт работы от 10 лет</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Прайс-лист -->
+    <section id="prices" class="py-5">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+             <h2 class="section-title mb-3">Прайс-лист</h2>
+                <p class="lead text-muted">Актуальные цены на строительные услуги</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="card-title text-orange mb-4">Строительство фундамента</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead><tr><th>Услуга</th><th>Ед. изм.</th><th>Цена</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Ленточный фундамент</td><td>м³</td><td>12 500 ₽</td></tr>
+                                        <tr><td>Монолитная плита</td><td>м²</td><td>8 900 ₽</td></tr>
+                                        <tr><td>Свайно-ростверковый</td><td>м.п.</td><td>6 700 ₽</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <h5 class="card-title text-orange mb-4">Отделочные работы</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead><tr><th>Услуга</th><th>Ед. изм.</th><th>Цена</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Штукатурка стен</td><td>м²</td><td>450 ₽</td></tr>
+                                        <tr><td>Укладка плитки</td><td>м²</td><td>1 100 ₽</td></tr>
+                                        <tr><td>Поклейка обоев</td><td>м²</td><td>350 ₽</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Услуги -->
+    <section id="services" class="py-5 bg-light">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="section-title mb-3">Наши услуги</h2>
+                <p class="lead text-muted">Полный спектр строительных и ремонтных работ</p>
+            </div>
+            <div class="row g-4" id="catalog">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 hover-lift">
+                        <div class="service-image"><img src="stroitelstva-doma.jpg" class="card-img-top" alt="Строительство домов"></div>
+                        <div class="card-body">
+                            <h5 class="card-title">Строительство домов</h5>
+                            <p class="card-text text-muted">Строительство частных домов под ключ из различных материалов.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h4 text-orange mb-0">от 35 000 ₽/м²</span>
+                                <a href="#forma" class="btn btn-outline-orange">Заказать</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 hover-lift">
+                        <div class="service-image"><img src="remont.jpg" class="card-img-top" alt="Ремонт квартир"></div>
+                        <div class="card-body">
+                            <h5 class="card-title">Ремонт квартир</h5>
+                            <p class="card-text text-muted">Косметический и капитальный ремонт квартир любой сложности.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h4 text-orange mb-0">от 8 500 ₽/м²</span>
+                                <a href="#forma" class="btn btn-outline-orange">Заказать</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0 hover-lift">
+                        <div class="service-image"><img src="fasad.jpg" class="card-img-top" alt="Фасадные работы"></div>
+                        <div class="card-body">
+                            <h5 class="card-title">Фасадные работы</h5>
+                            <p class="card-text text-muted">Утепление и отделка фасадов зданий любой сложности.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="h4 text-orange mb-0">от 1 200 ₽/м²</span>
+                                <a href="#forma" class="btn btn-outline-orange">Заказать</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Форма заказа -->
+    <section id="forma" class="py-5">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="section-title mb-3">Оформить заказ</h2>
+                <p class="lead text-muted">Заполните форму и мы свяжемся с вами для уточнения деталей</p>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow border-0">
+                        <div class="card-body p-4 p-md-5">
+                            <form id="orderForm">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Имя *</label>
+                                        <input type="text" class="form-control" id="orderName" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Телефон *</label>
+                                        <input type="tel" class="form-control" id="orderPhone" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Email *</label>
+                                        <input type="email" class="form-control" id="orderEmail" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Тип услуги *</label>
+                                        <select class="form-select" id="orderService" required>
+                                            <option value="">Выберите услугу</option>
+                                            <option value="srv_house">Строительство дома</option>
+                                            <option value="srv_apartment">Ремонт квартиры</option>
+                                            <option value="srv_facade">Фасадные работы</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Адрес объекта *</label>
+                                        <input type="text" class="form-control" id="orderAddress" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Описание работ</label>
+                                        <textarea class="form-control" id="orderDescription" rows="4"></textarea>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-orange btn-lg w-100">Отправить заявку</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Отзывы -->
+    <section id="orders" class="py-5 bg-light">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="section-title mb-3">Отзывы клиентов</h2>
+                <p class="lead text-muted">Что говорят о нас наши клиенты</p>
+            </div>
+            <div class="swiper testimonialSwiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    <img src="aleksey.jpg" alt="Алексей Петров" class="testimonial-photo me-3">
+                                    <div>
+                                        <h6 class="mb-1">Алексей Петров</h6>
+                                        <div class="stars text-warning">
+                                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="card-text">Отличная компания! Построили нам дом за 6 месяцев, как и обещали.</p>
+                                <small class="text-muted">15 ноября 2024</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    <img src="maria.jpg" alt="Мария Соколова" class="testimonial-photo me-3">
+                                    <div>
+                                        <h6 class="mb-1">Мария Соколова</h6>
+                                        <div class="stars text-warning">
+                                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="card-text">Делали капитальный ремонт квартиры. Результатом очень довольны!</p>
+                                <small class="text-muted">3 октября 2024</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="card shadow-sm border-0 h-100">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    <img src="dmitriy.jpg" alt="Дмитрий Волков" class="testimonial-photo me-3">
+                                    <div>
+                                        <h6 class="mb-1">Дмитрий Волков</h6>
+                                        <div class="stars text-warning">
+                                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="card-text">Заказывали фасадные работы. Работа выполнена профессионально.</p>
+                                <small class="text-muted">22 сентября 2024</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Контакты -->
+    <section id="contacts" class="py-5">
+        <div class="container py-4">
+            <div class="text-center mb-5">
+                <h2 class="section-title mb-3">Контакты</h2>
+                <p class="lead text-muted">Свяжитесь с нами удобным для вас способом</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="card h-100 shadow-sm border-0">
+                                <div class="card-body text-center">
+                                    <div class="icon-box-sm mb-3 mx-auto"><i class="bi bi-telephone"></i></div>
+                                    <h6 class="text-muted mb-2">Телефон</h6>
+                                    <a href="tel:+71234567890" class="text-dark text-decoration-none">+7 (123) 456-78-90</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card h-100 shadow-sm border-0">
+                                <div class="card-body text-center">
+                                    <div class="icon-box-sm mb-3 mx-auto"><i class="bi bi-envelope"></i></div>
+                                    <h6 class="text-muted mb-2">Email</h6>
+                                    <a href="mailto:autonomsis@mail.ru" class="text-dark text-decoration-none">autonomsis@mail.ru</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card h-100 shadow-sm border-0">
+                                <div class="card-body text-center">
+                                    <div class="icon-box-sm mb-3 mx-auto"><i class="bi bi-geo-alt"></i></div>
+                                    <h6 class="text-muted mb-2">Адрес</h6>
+                                    <p class="text-dark mb-0">г. Омск, ул. 1-я Индустриальная, д. 4/3</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="card h-100 shadow-sm border-0">
+                                <div class="card-body text-center">
+                                    <div class="icon-box-sm mb-3 mx-auto"><i class="bi bi-clock"></i></div>
+                                    <h6 class="text-muted mb-2">Режим работы</h6>
+                                    <p class="text-dark mb-0">Пн-Пт: 8:00-17:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2344.1964823553903!2d73.43346987689254!3d54.96410947280254!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x43aafdc9568593cf%3A0x3a787e3105aacd7!2zMS3RjyDQmNC90LTRg9GB0YLRgNC40LDQu9GM0L3QsNGPINGD0LsuLCA0IDMsINCe0LzRgdC6LCDQntC80YHQutCw0Y8g0L7QsdC7LiwgNjQ0MDI3!5e1!3m2!1sru!2sru!4v1765477377441!5m2!1sru!2sru" style="border:0; width: 100%; height: 400px;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="footer bg-dark text-light pt-5 pb-3">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-building text-orange fs-1 me-2"></i>
+                        <div>
+                            <div class="fw-bold">Автономные системы</div>
+                            <small>Строительная компания</small>
+                        </div>
+                    </div>
+                    <p class="small">Профессиональное строительство и ремонт с 2009 года.</p>
+                    <div>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle me-2"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <h6>Компания</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#about" class="text-white text-decoration-none">О нас</a></li>
+                        <li><a href="#services" class="text-white text-decoration-none">Услуги</a></li>
+                        <li><a href="#orders" class="text-white text-decoration-none">Отзывы</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2">
+                    <h6>Услуги</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="#services" class="text-white text-decoration-none">Строительство</a></li>
+                        <li><a href="#services" class="text-white text-decoration-none">Ремонт</a></li>
+                        <li><a href="#services" class="text-white text-decoration-none">Фасады</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6>Контакты</h6>
+                    <p class="small mb-1"><i class="bi bi-telephone me-2"></i>+7 (123) 456-78-90</p>
+                    <p class="small mb-1"><i class="bi bi-envelope me-2"></i>autonomsis@mail.ru</p>
+                    <p class="small"><i class="bi bi-geo-alt me-2"></i>г. Омск, ул. 1-я Индустриальная, д. 4/3</p>
+                </div>
+            </div>
+            <hr class="border-secondary">
+            <div class="text-center"><small>© 2025 Автономные системы. Все права защищены.</small></div>
+        </div>
+    </footer>
+
+    <!-- Кнопки и скрипты -->
+    <button id="callButton" class="btn btn-orange rounded-circle shadow-lg fixed-btn-left" data-bs-toggle="modal" data-bs-target="#callModal"><i class="bi bi-telephone"></i></button>
+    <button id="scrollTopButton" class="btn btn-dark rounded-circle shadow-lg fixed-btn-right" style="display: none;"><i class="bi bi-arrow-up"></i></button>
+
+    <div class="modal fade" id="callModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Заказать звонок</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="callbackForm">
+                        <div class="mb-3">
+                            <label class="form-label">Телефон</label>
+                            <input type="tel" class="form-control" id="callbackPhone" required>
+                        </div>
+                        <button type="submit" class="btn btn-orange w-100">Заказать звонок</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

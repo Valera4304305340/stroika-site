@@ -1,0 +1,23 @@
+RewriteEngine On
+
+# Разрешить доступ к статическим файлам
+<FilesMatch "\.(css|js|jpg|jpeg|png|gif|svg|ico|webp)$">
+    Allow from all
+</FilesMatch>
+
+# Перенаправление всех запросов на index.html (SPA)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.html [L]
+
+# Защита конфигурационных файлов
+<FilesMatch "^(config|db)\.php$">
+    Deny from all
+</FilesMatch>
+
+# CORS для API
+<FilesMatch "\.php$">
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</FilesMatch>

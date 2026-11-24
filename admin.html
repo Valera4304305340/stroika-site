@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - Автономные системы</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f3f4f6; }
+        .sidebar { min-height: 100vh; background-color: #1f2937; color: white; }
+        .sidebar a { color: #d1d5db; text-decoration: none; padding: 15px 20px; display: block; }
+        .sidebar a:hover, .sidebar a.active { background-color: #374151; color: white; border-left: 4px solid #ffcc00; }
+        .table-container { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <div class="sidebar col-md-2 d-none d-md-block">
+            <h4 class="p-3 text-center border-bottom border-secondary">Админка</h4>
+            <a href="#" class="active" onclick="showTab('orders')"><i class="bi bi-box me-2"></i> Заказы</a>
+            <a href="#" onclick="showTab('users')"><i class="bi bi-people me-2"></i> Пользователи</a>
+            <a href="#" onclick="showTab('logs')"><i class="bi bi-list-ul me-2"></i> Журнал действий</a>
+            <hr class="text-secondary">
+            <a href="/" class="text-danger"><i class="bi bi-box-arrow-left me-2"></i> На сайт</a>
+        </div>
+
+        <div class="col-md-10 p-4">
+            <div id="authError" class="alert alert-danger d-none">У вас нет прав администратора.</div>
+            
+            <div id="adminContent" class="d-none">
+                <div id="tab-orders">
+                    <h3 class="mb-4">Управление заказами</h3>
+                    <div class="table-container table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Клиент</th>
+                                    <th>Услуга</th>
+                                    <th>Адрес</th>
+                                    <th>Цена</th>
+                                    <th>Статус</th>
+                                    <th>Действие</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-users" class="d-none">
+                    <h3 class="mb-4">Пользователи</h3>
+                    <div class="table-container table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Имя</th>
+                                    <th>Email</th>
+                                    <th>Роль</th>
+                                    <th>Заблокирован?</th>
+                                    <th>Действия</th> <!-- Новая колонка -->
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-logs" class="d-none">
+                    <h3 class="mb-4">Журнал действий (Audit Log)</h3>
+                    <div class="table-container table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Время</th>
+                                    <th>Действие</th>
+                                    <th>Описание</th>
+                                    <th>IP</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        
+        async function init() {
+            if (!token) {
+                document.getElementById('authError').textContent = 'Вы не авторизованы. Войдите как администратор.';
+                document.getElementById('authError').classList.remove('d-none');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                
+                if (!data.success || data.user.role !== 'admin') {
+                    document.getElementById('authError').textContent = 'У вас нет прав администратора.';
+                    document.getElementById('authError').classList.remove('d-none');
+                    return;
+                }
+
+                document.getElementById('adminContent').classList.remove('d-none');
+                loadOrders();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('tab-orders').classList.add('d-none');
+            document.getElementById('tab-users').classList.add('d-none');
+            document.getElementById('tab-logs').classList.add('d-none');
+            
+            document.getElementById(`tab-${tab}`).classList.remove('d-none');
+            
+            if (tab === 'orders') loadOrders();
+            if (tab === 'users') loadUsers();
+            if (tab === 'logs') loadLogs();
+        }
+
+        async function loadOrders() {
+            const res = await fetch('/api/orders/all', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (data.success) {
+                const tbody = document.getElementById('ordersTableBody');
+                tbody.innerHTML = data.orders.map(o => `
+                    <tr>
+                        <td><small>${o.id.substring(0,8)}...</small></td>
+                        <td>${o.client_name}</td>
+                        <td>${o.service_name}</td>
+                        <td>${o.address}</td>
+                        <td>${o.total_price} ₽</td>
+                        <td><span class="badge bg-secondary">${o.status}</span></td>
+                        <td>
+                            <select class="form-select form-select-sm" onchange="changeStatus('${o.id}', this.value)">
+                                <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Ожидание</option>
+                                <option value="confirmed" ${o.status === 'confirmed' ? 'selected' : ''}>Подтвержден</option>
+                                <option value="in_progress" ${o.status === 'in_progress' ? 'selected' : ''}>В работе</option>
+                                <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>Завершен</option>
+                                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Отменен</option>
+                            </select>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function changeStatus(orderId, status) {
+            await fetch(`/api/orders/${orderId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ status })
+            });
+            alert('Статус обновлен!');
+            loadOrders();
+        }
+
+        async function loadUsers() {
+            const res = await fetch('/api/auth/users', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (data.success) {
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = data.users.map(u => `
+                    <tr>
+                        <td><small>${u.id.substring(0,8)}...</small></td>
+                        <td>${u.full_name || '-'}</td>
+                        <td>${u.email}</td>
+                        <td><span class="badge bg-${u.role === 'admin' ? 'danger' : 'primary'}">${u.role}</span></td>
+                        <td>${u.is_locked ? '<span class="text-danger">Да</span>' : 'Нет'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')" title="Удалить">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // --- НОВАЯ ФУНКЦИЯ УДАЛЕНИЯ ---
+        async function deleteUser(userId) {
+            if (!confirm('Вы уверены, что хотите удалить этого пользователя? Это действие необратимо.')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/auth/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    alert('Пользователь удален');
+                    loadUsers(); // Обновляем таблицу
+                } else {
+                    alert(data.message || 'Ошибка удаления');
+                }
+            } catch (error) {
+                alert('Ошибка соединения с сервером');
+            }
+        }
+
+        async function loadLogs() {
+            const res = await fetch('/api/auth/logs', { headers: { 'Authorization': `Bearer ${token}` } });
+            const data = await res.json();
+            if (data.success) {
+                const tbody = document.getElementById('logsTableBody');
+                tbody.innerHTML = data.logs.map(l => `
+                    <tr>
+                        <td><small>${new Date(l.timestamp).toLocaleString()}</small></td>
+                        <td><span class="badge bg-dark">${l.action}</span></td>
+                        <td>${l.description || '-'}</td>
+                        <td>${l.ip_address || '-'}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
