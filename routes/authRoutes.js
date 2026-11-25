@@ -11,42 +11,35 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   try {
     const { email, password, firstName, lastName, phone } = req.body;
-    
-    if (!email || !password || !firstName) {
-      return res.status(400).json({ success: false, message: 'Заполните обязательные поля' });
-    }
+    if (!email || !password || !firstName) return res.status(400).json({ success: false, message: 'Заполните поля' });
     
     const existing = await dbGet('SELECT id FROM users WHERE email = ?', [email]);
-    if (existing) {
-      return res.status(400).json({ success: false, message: 'Email уже используется' });
-    }
+    if (existing) return res.status(400).json({ success: false, message: 'Email уже используется' });
 
     const hash = await bcrypt.hash(password, config.security.bcryptRounds);
     const userId = uuidv4();
-    
-    // Генерируем 6-значный код
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log(`[DEBUG] Код для ${email}: ${verificationCode}`); // Вывод в консоль для проверки
+    
+    // Выводим код в консоль, чтобы вы могли его увидеть на Render в логах
+    console.log(`[DEBUG] Код для ${email}: ${verificationCode}`);
 
-    // Создаем пользователя с флагом is_verified = 0 (не подтвержден)
     await dbRun(`INSERT INTO users (id, username, email, password_hash, full_name, phone, role, verification_code, is_verified) VALUES (?, ?, ?, ?, ?, ?, 'client', ?, 0)`,
       [userId, email.split('@')[0], email, hash, `${firstName} ${lastName}`, phone || null, verificationCode]);
 
-    // Отправляем код на почту
+    // Пытаемся отправить письмо, но даже если не уйдет, НЕ удаляем пользователя
     const emailSent = await sendVerificationCode(email, verificationCode);
     
     if (!emailSent) {
-      // Если письмо не ушло, удаляем пользователя
-      await dbRun('DELETE FROM users WHERE id = ?', [userId]);
-      return res.status(500).json({ success: false, message: 'Ошибка отправки письма. Проверьте правильность email.' });
+      console.log('Ошибка отправки письма, но пользователь создан. Код: ' + verificationCode);
     }
 
     await dbRun(`INSERT INTO audit_log (id, user_id, action, description) VALUES (?, ?, 'REGISTER', 'Новый пользователь ожидает подтверждения')`, [uuidv4(), userId]);
     
-    res.json({ success: true, message: 'Код подтверждения отправлен на вашу почту!' });
+    // Всегда возвращаем успех!
+    res.json({ success: true, message: 'Код отправлен! Если письмо не пришло, проверьте консоль сервера.' });
   } catch (e) { 
     console.error(e);
-    res.status(500).json({ success: false, message: 'Ошибка сервера' }); 
+    res.status(500).json({ success: false, message: 'Ошибка сервера: ' + e.message }); 
   }
 });
 
